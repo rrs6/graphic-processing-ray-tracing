@@ -1,0 +1,5 @@
+# Ignorar pasta de build
+build/
+
+# Ignorar configurações do VS Code
+.vscode/
