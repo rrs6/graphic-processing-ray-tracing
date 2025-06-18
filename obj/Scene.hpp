@@ -6,6 +6,7 @@
 #include "../core/Vector.hpp"
 #include "../obj/Camera.hpp"
 #include "../obj/Sphere.hpp"
+#include "../obj/Plan.hpp"
 #include "../utils/RGB.hpp"
 
 class Scene {
@@ -28,7 +29,7 @@ public:
     void setHeight(int height);
     void setScreenDistance(double distance);
     void render();
-    RGB checkIntersections(std::vector<Sphere> &c, Point &screenPoint);
+    RGB checkIntersections(std::vector<Sphere> &spheres, std::vector<Plan> &planes, Point &screenPoint);
 };
 
 #endif
