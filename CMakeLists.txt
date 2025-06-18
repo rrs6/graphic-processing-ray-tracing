@@ -13,6 +13,7 @@ set(SOURCES
     obj/Camera.cpp
     obj/Scene.cpp
     obj/Sphere.cpp
+    obj/Plan.cpp
     src/main.cpp
 )
 
