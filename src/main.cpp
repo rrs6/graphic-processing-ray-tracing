@@ -5,15 +5,15 @@
 #include "../obj/Scene.hpp"
 
 int main() {
-    Point origin(0.0, 0.0, 0.0);
-    Point target(0.0, 0.0, -1.0);
+    Point origin(0.0, 0.0, 5);
+    Point target(0.0, 0, 0);
     Vector up(0.0, 1.0, 0.0);
 
-    double distanciaTela = 10;
+    double distanciaTela = 1;
     Camera camera(origin, target, up, distanciaTela);
 
-    int largura = 800;
-    int altura = 600;
+    int largura = 500;
+    int altura = 500;
 
     Scene scene(camera, largura, altura, camera.getD());
 
