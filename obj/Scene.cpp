@@ -30,11 +30,17 @@ void Scene::setHeight(int height) { this->height = height; }
 void Scene::setScreenDistance(double distance) { screenDistance = distance; }
 
 
-void Scene::render() {
-    Sphere circle1 = Sphere(Point(0, 0, -80), 2, RGB(24, 89, 199));
-    Sphere circle2 = Sphere(Point(0, 0, -90), 4, RGB(255, 255, 255));
+void Scene::render() {    
+    Sphere s1 = Sphere(Point(2, -4.5, -2), 0.5, RGB(179, 51, 51));   // menor - vermelho
+    Sphere s2 = Sphere(Point(0, -4, -2), 1, RGB(51, 179, 51));   // média - verde
+    Sphere s3 = Sphere(Point(-3, -3.5, -2), 1.5, RGB(51, 51, 179));   // maior - azul
 
-    Plan plan = Plan(Point(0, 0, 100), Vector(10, 20, 1), RGB(0, 156, 59));
+    Plan plan1 = Plan(Point(5, 0, 0),     Vector(-1, 0, 0),  RGB(51, 179, 51));   // parede direita (verde)
+    Plan plan2 = Plan(Point(-5, 0, 0),    Vector(1, 0, 0),   RGB(179, 51, 51));   // parede esquerda (vermelha)
+    Plan plan3 = Plan(Point(0, -5, 0),    Vector(0, 1, 0),   RGB(186, 186, 186)); // chão (branco)
+    Plan plan4 = Plan(Point(0, 5, 0),     Vector(0, -1, 0),  RGB(186, 186, 186)); // teto (branco)
+    Plan plan5 = Plan(Point(0, 0, -5),    Vector(0, 0, 1),   RGB(186, 186, 186)); // fundo (branco)
+    Plan plan6 = Plan(Point(0, 0, 6),     Vector(0, 0, -1),  RGB(186, 186, 186)); // frente (branco)
 
     Camera cam = getCamera();
     Vector front = cam.getFront();
@@ -52,7 +58,7 @@ void Scene::render() {
      for (int j = 0; j < height; ++j) {
         for (int i = 0; i < width; ++i) {
             double u = ((static_cast<double>(i) / (width - 1)) - 0.5) * 2 * aspectRatio;
-            double v = ((static_cast<double>(j) / (height - 1)) - 0.5) * 2;
+            double v = ((static_cast<double>(j) / (height - 1)) - 0.5) * -2;
 
             Vector offset = VectorOperations::escalar(right, u);
             offset = VectorOperations::soma(offset, VectorOperations::escalar(up, v));
@@ -63,7 +69,7 @@ void Scene::render() {
                 screenO.getZ() + offset.getZ()
             );
 
-            image[j][i] = checkIntersections(std::vector<Sphere>{circle1, circle2}, std::vector<Plan>{plan}, screenPoint);
+            image[j][i] = checkIntersections(std::vector<Sphere>{s1, s2, s3}, std::vector<Plan>{plan1, plan2, plan3, plan4, plan5, plan6}, screenPoint);
         }
     }
     std::ofstream out("output.ppm");
@@ -90,7 +96,7 @@ RGB Scene::checkIntersections(std::vector<Sphere> &spheres, std::vector<Plan> &p
         screenPoint.getZ() - getCamera().getO().getZ()
     );
     for(int i = 0; i < planes.size(); i++) {
-        double t = -VectorOperations::dot(planes[i].getNormal(), 
+        double t = VectorOperations::dot(planes[i].getNormal(), 
         Vector(
             planes[i].getP().getX() - getCamera().getO().getX(), 
             planes[i].getP().getY() - getCamera().getO().getY(),
