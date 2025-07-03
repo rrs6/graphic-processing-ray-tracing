@@ -15,6 +15,7 @@ set(SOURCES
     obj/Sphere.cpp
     obj/Plan.cpp
     src/main.cpp
+    obj/TriangleMesh.cpp
 )
 
 add_executable(raytracing_app ${SOURCES})
