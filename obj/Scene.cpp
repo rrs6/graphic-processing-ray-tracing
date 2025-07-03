@@ -73,8 +73,8 @@ void Scene::render() {
             double u = ((static_cast<double>(i) / (width - 1)) - 0.5) * 2 * aspectRatio;
             double v = ((static_cast<double>(j) / (height - 1)) - 0.5) * -2;
 
-            Vector offset = VectorOperations::escalar(right, u);
-            offset = VectorOperations::soma(offset, VectorOperations::escalar(up, v));
+            Vector offset = VectorOperations::scale(right, u);
+            offset = VectorOperations::sum(offset, VectorOperations::scale(up, v));
 
             Point screenPoint = Point(
                 screenO.getX() + offset.getX(),
@@ -128,9 +128,9 @@ RGB Scene::checkIntersections(std::vector<Sphere> &spheres, std::vector<Plan> &p
 
             if(t > 0) {
                 Point trianglePlanePoint = Point(
-                    getCamera().getO().getX() + VectorOperations::escalar(ray, t).getX(),
-                    getCamera().getO().getY() + VectorOperations::escalar(ray, t).getY(),
-                    getCamera().getO().getZ() + VectorOperations::escalar(ray, t).getZ()
+                    getCamera().getO().getX() + VectorOperations::scale(ray, t).getX(),
+                    getCamera().getO().getY() + VectorOperations::scale(ray, t).getY(),
+                    getCamera().getO().getZ() + VectorOperations::scale(ray, t).getZ()
                 );
 
                 Vector v0v1 = Vector(v1.getX() - v0.getX(), v1.getY() - v0.getY(), v1.getZ() - v0.getZ());

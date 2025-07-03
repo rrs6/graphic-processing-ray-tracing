@@ -8,9 +8,9 @@ Camera::Camera(const Point& o, const Point& target, const Vector& up, double d) 
     front = Vector(target.getX() - o.getX(),
                 target.getY()- o.getY(),
                 target.getZ() - o.getZ());
-    front = VectorOperations::normalizar(front);
-    w = VectorOperations::normalizar(VectorOperations::produtoVetorial(front, up));
-    this->up = VectorOperations::normalizar(VectorOperations::produtoVetorial(w, front));
+    front = VectorOperations::normalize(front);
+    w = VectorOperations::normalize(VectorOperations::crossProduct(front, up));
+    this->up = VectorOperations::normalize(VectorOperations::crossProduct(w, front));
 }
 
 Point Camera::getO() const { return o; }
