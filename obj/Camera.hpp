@@ -26,8 +26,8 @@ public:
     void setO(const Point& origem);
     void setTarget(const Point& alvo);
     void setUp(const Vector& up);
-    void setFront(const Vector& front);
     void setD(const double d);
+    void transform(const double (&m)[4][4]);
 };
 
 #endif

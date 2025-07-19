@@ -32,8 +32,22 @@ void Scene::setScreenDistance(double distance) { screenDistance = distance; }
 
 
 void Scene::render() {
+    double m[4][4] = {
+        {1, 0, 0, 0},
+        {0, 1, 0, 0},
+        {0, 0, 1, 0},
+        {0, 0, 0, 1}
+    };
+
+    double m1[4][4] = {
+        {1, 0, 0, 0},
+        {0, 1, 0, 0},
+        {0, 0, 1, 0},
+        {0, 0, 0, 1}
+    };
+
     std::vector<Point> vertices = {
-        Point(0,    1.25, 10),     // 0 - topo
+        Point(0,    1.25, 10),    // 0 - topo
         Point(1.785, 0,   10),     // 1 - direita
         Point(0,   -1.25, 10),     // 2 - base
         Point(-1.785, 0,  10)
@@ -44,7 +58,7 @@ void Scene::render() {
         {{0, 1, 2},
         {0, 2, 3}},
         {Vector(0, 0, 1), Vector(0, 0, 1)},
-        RGB(255, 223, 0) // brown
+        RGB(255, 223, 0)
     );
 
 
@@ -53,7 +67,7 @@ void Scene::render() {
     // Sphere s2 = Sphere(Point(0, -4, -2), 1, RGB(51, 179, 51));   // média - verde
     // Sphere s3 = Sphere(Point(-3, -3.5, -2), 1.5, RGB(51, 51, 179));   // maior - azul
 
-    Plan plan1 = Plan(Point(0, 0, 10), Vector(0, 0, 1), RGB(0, 148, 64));   // parede direita (verde)
+    Plan plan1 = Plan(Point(0, 3, 10), Vector(0, 2, 0), RGB(0, 148, 64));   // parede direita (verde)
 
     Camera cam = getCamera();
     Vector front = cam.getFront();
@@ -86,7 +100,7 @@ void Scene::render() {
                 std::vector<TriangleMesh>{losango}, screenPoint);
         }
     }
-    std::ofstream out("output.ppm");
+    std::ofstream out("output1.ppm");
     out << "P3\n" << width << ' ' << height << "\n255\n";
 
     for (int j = 0; j < height; ++j) {

@@ -16,6 +16,7 @@ public:
     Point getO() const;
     double getR() const;
     RGB getColor() const;
+    void transform(const double (&m)[4][4]);
 };
 
 #endif

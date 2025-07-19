@@ -17,6 +17,7 @@ public:
     Point getP() const;
     Vector getNormal() const;
     RGB getColor() const;
+    void transform(const double (&m)[4][4]);
 };
 
 #endif

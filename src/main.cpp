@@ -3,8 +3,13 @@
 #include "../core/Point.hpp"
 #include "../utils/VectorOperations.hpp"
 #include "../obj/Scene.hpp"
+#include "../obj/ObjReader.cpp"
 
 int main() {
+    objReader obj("../inputs/cubo.obj");
+
+    obj.print_faces();
+   
     Point origin(0.0, 0.0, 0);
     Point target(0.0, 0, 10);
     Vector up(0.0, 1.0, 0.0);

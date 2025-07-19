@@ -20,6 +20,7 @@ public:
     std::vector<std::tuple<int, int, int>> getMesh() const;
     std::vector<Vector> getNormals() const;
     RGB getColor() const;
+    void transform(const double (&m)[4][4]);
 };
 
 #endif
