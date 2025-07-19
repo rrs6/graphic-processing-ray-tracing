@@ -10,6 +10,7 @@ set(SOURCES
     core/Point.cpp
     core/Vector.cpp
     utils/VectorOperations.cpp
+    obj/Light.cpp
     obj/Camera.cpp
     obj/Scene.cpp
     obj/Sphere.cpp
