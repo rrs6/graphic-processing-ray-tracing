@@ -32,6 +32,7 @@ Caso sintam necessidade, podem editar a classe para obter mais informações.
 #include "../core/Vector.hpp"
 #include "../core/Point.hpp"
 #include "Colormap.cpp"
+#include "TriangleMesh.hpp"
 
 
 
@@ -198,16 +199,16 @@ public:
 
 
     // Emite um output no terminal para cada face, com seus respectivos pontos (x, y, z)
-    void print_faces() {
+    TriangleMesh getMesh() {
+        vector<tuple<int, int, int>> mesh;
+        vector<Vector> nrml;
         int i = 0;
         for (const auto& face : facePoints) {
+            nrml.push_back(normals[faces[i].normalIndice[0]]);
+            mesh.push_back(make_tuple(faces[i].verticeIndice[0], faces[i].verticeIndice[1], faces[i].verticeIndice[2]));
             i++;
-            std::clog << "Face " << i << ": ";
-            for (const auto& point : face) {
-                std::cout << "(" << point.getX() << ", " << point.getY() << ", " << point.getZ() << ")";
-            }
-            std::clog << std::endl;
         }
+        return TriangleMesh(vertices, mesh, nrml, RGB(200, 0, 0), curMaterial);
     }
 };
 

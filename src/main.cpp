@@ -7,11 +7,10 @@
 
 int main() {
     objReader obj("../inputs/cubo.obj");
-
-    obj.print_faces();
+    vector<TriangleMesh> meshs = {obj.getMesh()};
    
-    Point origin(0.0, 0.0, 0);
-    Point target(0.0, 0, 10);
+    Point origin(3.0, 0.0, -10);
+    Point target(0.0, 0, 0);
     Vector up(0.0, 1.0, 0.0);
 
     double distanciaTela = 5;
@@ -22,6 +21,6 @@ int main() {
 
     Scene scene(camera, largura, altura, camera.getD());
 
-    scene.render();
+    scene.render(meshs, vector<Light>{Light(Point(20,20,10), RGB(0,200, 200))});
     return 0;
 }

@@ -1,9 +1,10 @@
 #include "Plan.hpp"
 #include <array>
+#include "Colormap.cpp"
 
 using namespace std;
 
-Plan::Plan(const Point& p, const Vector &normal, const RGB &color, const array<double, 6> &props) : p(p), normal(normal), color(color), props(props) {}
+Plan::Plan(const Point& p, const Vector &normal, const RGB &color, const MaterialProperties &props) : p(p), normal(normal), color(color), props(props) {}
 
 Point Plan::getP() const { return p; }
 
@@ -24,6 +25,6 @@ void Plan::transform(const double (&m)[4][4]) {
     );
 }
 
-array<double, 6> Plan::getProps() const {
+MaterialProperties Plan::getProps() const {
     return this->props;
 }

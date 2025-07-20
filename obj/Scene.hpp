@@ -32,9 +32,9 @@ public:
     void setWidth(int width);
     void setHeight(int height);
     void setScreenDistance(double distance);
-    void render();
+    void render(vector<TriangleMesh> &meshs, vector<Light> &lights);
     RGB checkIntersections(vector<Sphere> &spheres, vector<Plan> &planes, vector<TriangleMesh> &meshs, Point &screenPoint, vector<Light> &lights);
-    RGB lighting(vector<Light> &lights, tuple<RGB, array<double, 6>, Vector, Point> &objInfo, RGB &ambientLight);
+    RGB lighting(vector<Light> &lights, tuple<RGB, MaterialProperties, Vector, Point> &objInfo, RGB &ambientLight);
 };
 
 #endif

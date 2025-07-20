@@ -1,6 +1,6 @@
 #include "../obj/TriangleMesh.hpp"
 
-TriangleMesh::TriangleMesh(const std::vector<Point> &vertices, const std::vector<std::tuple<int, int, int>> &mesh, const std::vector<Vector> &normals, const RGB &color, const array<double, 6> &props) : vertices(vertices), mesh(mesh), normals(normals), color(color), props(props) {}
+TriangleMesh::TriangleMesh(const std::vector<Point> &vertices, const std::vector<std::tuple<int, int, int>> &mesh, const std::vector<Vector> &normals, const RGB &color, const MaterialProperties &props) : vertices(vertices), mesh(mesh), normals(normals), color(color), props(props) {}
 
 std::vector<Point> TriangleMesh::getVertices() const { return vertices; }
 
@@ -27,6 +27,6 @@ void TriangleMesh::transform(const double (&m)[4][4]) {
     }
 }
 
-array<double, 6> TriangleMesh::getProps() const {
+MaterialProperties TriangleMesh::getProps() const {
     return this->props;
 }

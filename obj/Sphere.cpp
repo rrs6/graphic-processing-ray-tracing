@@ -1,10 +1,11 @@
 #include "../core/Point.hpp"
 #include "Sphere.hpp"
 #include <array>
+#include "Colormap.cpp"
 
 using namespace std;
 
-Sphere::Sphere(const Point& o, const double r, const RGB &color, const array<double, 6> &props) : o(o), r(r), color(color), props(props) {}
+Sphere::Sphere(const Point& o, const double r, const RGB &color, const MaterialProperties &props) : o(o), r(r), color(color), props(props) {}
 
 Point Sphere::getO() const { return o; }
 
@@ -20,6 +21,6 @@ void Sphere::transform(const double (&m)[4][4]) {
     );
 }
 
-array<double, 6> Sphere::getProps() const {
+MaterialProperties Sphere::getProps() const {
     return this->props;
 }
