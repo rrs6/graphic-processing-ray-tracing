@@ -8,7 +8,10 @@
 #include "../obj/Sphere.hpp"
 #include "../obj/Plan.hpp"
 #include "../utils/RGB.hpp"
+#include "Light.hpp"
 #include "../obj/TriangleMesh.hpp"
+
+using namespace std;
 
 class Scene {
 private:
@@ -30,7 +33,8 @@ public:
     void setHeight(int height);
     void setScreenDistance(double distance);
     void render();
-    RGB checkIntersections(std::vector<Sphere> &spheres, std::vector<Plan> &planes, std::vector<TriangleMesh> &meshs, Point &screenPoint);
+    RGB checkIntersections(vector<Sphere> &spheres, vector<Plan> &planes, vector<TriangleMesh> &meshs, Point &screenPoint, vector<Light> &lights);
+    RGB lighting(vector<Light> &lights, tuple<RGB, array<double, 6>, Vector, Point> &objInfo, RGB &ambientLight);
 };
 
 #endif

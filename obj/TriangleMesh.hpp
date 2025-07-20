@@ -6,21 +6,26 @@
 #include "../core/Point.hpp"
 #include "../utils/RGB.hpp"
 #include "../core/Vector.hpp"
+#include <array>
 
+using namespace std;
 class TriangleMesh
 {
 private:
-    std::vector<Point> vertices;
-    std::vector<std::tuple<int, int, int>> mesh;
-    std::vector<Vector> normals;
+    vector<Point> vertices;
+    vector<tuple<int, int, int>> mesh;
+    vector<Vector> normals;
     RGB color;
+    array<double, 6> props;
+
 public:
-    TriangleMesh(const std::vector<Point> &vertices, const std::vector<std::tuple<int, int, int>> &mesh, const std::vector<Vector> &normals, const RGB &color);
-    std::vector<Point> getVertices() const;
-    std::vector<std::tuple<int, int, int>> getMesh() const;
-    std::vector<Vector> getNormals() const;
+    TriangleMesh(const vector<Point> &vertices, const vector<tuple<int, int, int>> &mesh, const vector<Vector> &normals, const RGB &color, const array<double, 6> &props);
+    vector<Point> getVertices() const;
+    vector<tuple<int, int, int>> getMesh() const;
+    vector<Vector> getNormals() const;
     RGB getColor() const;
     void transform(const double (&m)[4][4]);
+    array<double, 6> getProps() const;
 };
 
 #endif

@@ -9,7 +9,11 @@
 #include <fstream>
 #include <vector>
 #include <set>
+#include <array>
+#include <tuple>
 #include <math.h>
+
+using namespace std;
 
 Scene::Scene(const Camera& camera, int width, int height, double distance)
     : camera(camera), width(width), height(height), screenDistance(distance) {}
@@ -46,7 +50,11 @@ void Scene::render() {
         {0, 0, 0, 1}
     };
 
-    std::vector<Point> vertices = {
+    vector<Light> lights = {
+        Light(Point(-5, 2, 30), RGB(200, 0, 0))
+    };
+
+    vector<Point> vertices = {
         Point(0,    1.25, 10),    // 0 - topo
         Point(1.785, 0,   10),     // 1 - direita
         Point(0,   -1.25, 10),     // 2 - base
@@ -58,17 +66,13 @@ void Scene::render() {
         {{0, 1, 2},
         {0, 2, 3}},
         {Vector(0, 0, 1), Vector(0, 0, 1)},
-        RGB(255, 223, 0)
+        RGB(255, 223, 0),
+        {0, 0.4, 0.5, 30, 0, 0}
     );
 
 
-    Sphere s1 = Sphere(Point(0, 0, 10), 0.8, RGB(0, 39, 118));
-    // Sphere s1 = Sphere(Point(2, -4.5, -2), 0.5, RGB(179, 51, 51));   // menor - vermelho
-    // Sphere s2 = Sphere(Point(0, -4, -2), 1, RGB(51, 179, 51));   // média - verde
-    // Sphere s3 = Sphere(Point(-3, -3.5, -2), 1.5, RGB(51, 51, 179));   // maior - azul
-
-    Plan plan1 = Plan(Point(0, 3, 10), Vector(0, 2, 0), RGB(0, 148, 64));   // parede direita (verde)
-
+    Sphere s1 = Sphere(Point(0, 0, 40), 3, RGB(0, 0, 0), {0, 0.8, 0.9, 20, 0, 0});
+    //Plan plan1 = Plan(Point(0, 3, 10), Vector(0, 2, 0), RGB(0, 148, 64), {0, 0.4, 0.5, 30, 0, 0});
     Camera cam = getCamera();
     Vector front = cam.getFront();
     Vector up = cam.getUp();
@@ -80,7 +84,7 @@ void Scene::render() {
         cam.getO().getZ() + (front.getZ() * screenDistance)
     );
     double aspectRatio = static_cast<double>(width) / height;
-    std::vector<std::vector<RGB>> image(height, std::vector<RGB>(width, RGB(255, 255, 255)));
+    vector<vector<RGB>> image(height, vector<RGB>(width, RGB(255, 255, 255)));
 
      for (int j = 0; j < height; ++j) {
         for (int i = 0; i < width; ++i) {
@@ -96,11 +100,11 @@ void Scene::render() {
                 screenO.getZ() + offset.getZ()
             );
 
-            image[j][i] = checkIntersections(std::vector<Sphere>{s1}, std::vector<Plan>{plan1},
-                std::vector<TriangleMesh>{losango}, screenPoint);
+            image[j][i] = checkIntersections(vector<Sphere>{s1}, vector<Plan>{},
+                vector<TriangleMesh>{}, screenPoint, lights);
         }
     }
-    std::ofstream out("output1.ppm");
+    ofstream out("output.ppm");
     out << "P3\n" << width << ' ' << height << "\n255\n";
 
     for (int j = 0; j < height; ++j) {
@@ -111,11 +115,11 @@ void Scene::render() {
     }
     out.close();
 }
-RGB Scene::checkIntersections(std::vector<Sphere> &spheres, std::vector<Plan> &planes, std::vector<TriangleMesh> &meshs, Point &screenPoint)
+RGB Scene::checkIntersections(vector<Sphere> &spheres, vector<Plan> &planes, vector<TriangleMesh> &meshs, Point &screenPoint, vector<Light> &lights)
 {
-    std::set<std::pair<double, RGB>, bool(*)(const std::pair<double, RGB>&, const std::pair<double, RGB>&)> hits(
-    [](const std::pair<double, RGB>& a, const std::pair<double, RGB>& b) {
-        return a.first < b.first;
+    set<tuple<double, RGB, array<double, 6>, Vector, Point>, bool(*)(const tuple<double, RGB, array<double, 6>, Vector, Point>&, const tuple<double, RGB, array<double, 6>, Vector, Point>&)> hits(
+    [](const tuple<double, RGB, array<double, 6>, Vector, Point>& a, const tuple<double, RGB, array<double, 6>, Vector, Point>& b) {
+        return get<0>(a) < get<0>(b);
     }
 );
     Vector ray = Vector(
@@ -126,13 +130,13 @@ RGB Scene::checkIntersections(std::vector<Sphere> &spheres, std::vector<Plan> &p
 
     for(int i = 0; i < meshs.size(); i++) {
         for(int j = 0; j < meshs[i].getMesh().size(); j++) {
-            std::tuple<int,int,int> vertices = meshs[i].getMesh().at(j);
+            tuple<int,int,int> vertices = meshs[i].getMesh().at(j);
             
             Vector normal = meshs[i].getNormals().at(j);
             
-            Point v0 = meshs[i].getVertices().at(std::get<0>(vertices));
-            Point v1 = meshs[i].getVertices().at(std::get<1>(vertices));
-            Point v2 = meshs[i].getVertices().at(std::get<2>(vertices));
+            Point v0 = meshs[i].getVertices().at(get<0>(vertices));
+            Point v1 = meshs[i].getVertices().at(get<1>(vertices));
+            Point v2 = meshs[i].getVertices().at(get<2>(vertices));
 
             double t = VectorOperations::dot(normal, Vector(
                 v1.getX() - getCamera().getO().getX(),
@@ -163,7 +167,7 @@ RGB Scene::checkIntersections(std::vector<Sphere> &spheres, std::vector<Plan> &p
                 double u = 1.0 - v - w;
 
                 if(u >= 0 && u <= 1 && v >= 0 && v <= 1 && w >= 0 && w <= 1) {
-                    hits.insert({t, meshs[i].getColor()});
+                    hits.insert({t, meshs[i].getColor(), meshs[i].getProps(), VectorOperations::normalize(normal), trianglePlanePoint});
                 }
             }
 
@@ -179,7 +183,7 @@ RGB Scene::checkIntersections(std::vector<Sphere> &spheres, std::vector<Plan> &p
         )) / VectorOperations::dot(planes[i].getNormal(), ray);
 
         if(t > 0) {
-            hits.insert({t, planes[i].getColor()});
+            hits.insert({t, planes[i].getColor(), planes[i].getProps(), VectorOperations::normalize(planes[i].getNormal()), Point(getCamera().getO().getX() + (ray.getX() * t), getCamera().getO().getY() + (ray.getY() * t), getCamera().getO().getZ() + (ray.getZ() * t))});
         }
     }
 
@@ -199,13 +203,104 @@ RGB Scene::checkIntersections(std::vector<Sphere> &spheres, std::vector<Plan> &p
         if(delta >= 0) {
             const double t1 = (-b + sqrt(delta))/(2*a);
             const double t2 = (-b - sqrt(delta))/(2*a);
-            if(t1>0 && t2>0)
-                hits.insert({std::min(t1, t2), spheres[i].getColor()});
-            else if(t1>0)
-                hits.insert({t1, spheres[i].getColor()});
-            else if(t2>0)
-                hits.insert({t2, spheres[i].getColor()});
+            if(t1>0 && t2>0){
+                Point intersection = Point(
+                    getCamera().getO().getX() + (ray.getX() * min(t1, t2)),
+                    getCamera().getO().getY() + (ray.getY() * min(t1, t2)),
+                    getCamera().getO().getZ() + (ray.getZ() * min(t1, t2))
+                );
+
+                Vector normal = Vector(
+                    intersection.getX() - spheres[i].getO().getX(),
+                    intersection.getY() - spheres[i].getO().getY(),
+                    intersection.getZ() - spheres[i].getO().getZ()
+                );
+
+                hits.insert({min(t1, t2), spheres[i].getColor(), spheres[i].getProps(), VectorOperations::normalize(normal), intersection});
+            }else if(t1>0) {
+                Point intersection = Point(
+                    getCamera().getO().getX() + (ray.getX() * t1),
+                    getCamera().getO().getY() + (ray.getY() * t1),
+                    getCamera().getO().getZ() + (ray.getZ() * t1)
+                );
+
+                Vector normal = Vector(
+                    intersection.getX() - spheres[i].getO().getX(),
+                    intersection.getY() - spheres[i].getO().getY(),
+                    intersection.getZ() - spheres[i].getO().getZ()
+                );
+
+                hits.insert({t1, spheres[i].getColor(), spheres[i].getProps(), VectorOperations::normalize(normal), intersection});
+
+            }else if(t2>0) {
+                Point intersection = Point(
+                    getCamera().getO().getX() + (ray.getX() * t2),
+                    getCamera().getO().getY() + (ray.getY() * t2),
+                    getCamera().getO().getZ() + (ray.getZ() * t2)
+                );
+
+                Vector normal = Vector(
+                    intersection.getX() - spheres[i].getO().getX(),
+                    intersection.getY() - spheres[i].getO().getY(),
+                    intersection.getZ() - spheres[i].getO().getZ()
+                );
+
+                hits.insert({t2, spheres[i].getColor(), spheres[i].getProps(), VectorOperations::normalize(normal), intersection});
+            }
         }
     }
-    return (hits.empty() ? RGB(0,0,0) : hits.begin()->second);
+    return (hits.empty() ? RGB(0,0,0) : lighting(lights, make_tuple(get<1>(*hits.begin()), get<2>(*hits.begin()), get<3>(*hits.begin()), get<4>(*hits.begin())), RGB(0, 0, 0)));
+}
+
+RGB Scene::lighting(vector<Light> &lights, tuple<RGB, array<double, 6>, Vector, Point> &objInfo, RGB &ambientLight) {
+    RGB light = RGB(get<0>(objInfo).r + ambientLight.r, get<0>(objInfo).g + ambientLight.g, get<0>(objInfo).b + ambientLight.b);
+    Point intersection = get<3>(objInfo);
+    Vector normal = get<2>(objInfo);
+    
+    for(int i = 0; i < lights.size(); i++) {
+        double kd = get<1>(objInfo)[1];
+        Point p = get<3>(objInfo);
+        
+        double coss = VectorOperations::dot(get<2>(objInfo), VectorOperations::normalize(
+                Vector(
+                    lights[i].getO().getX() - p.getX(),
+                    lights[i].getO().getY() - p.getY(),
+                    lights[i].getO().getZ() -p.getZ()
+                )));
+        //Difuse Light
+        light = RGB(
+            std::min(255, int(light.r + lights[i].getColor().r * kd * std::max(0.0, coss))),
+            std::min(255, int(light.g + lights[i].getColor().g * kd * std::max(0.0, coss))),
+            std::min(255, int(light.b + lights[i].getColor().b * kd * std::max(0.0, coss)))
+        );
+
+        Vector v = VectorOperations::normalize(Vector(
+            getCamera().getO().getX() - intersection.getX(),
+            getCamera().getO().getY() - intersection.getY(),
+            getCamera().getO().getZ() - intersection.getZ()
+        ));
+
+        Vector l = VectorOperations::normalize(Vector(
+            intersection.getX() - lights[i].getO().getX(),
+            intersection.getY() - lights[i].getO().getY(),
+            intersection.getZ() - lights[i].getO().getZ()
+        ));
+
+        Vector r = VectorOperations::normalize(Vector(VectorOperations::scale(Vector(
+            normal.getX() - l.getX(),
+            normal.getY() - l.getY(),
+            normal.getZ() - l.getZ()
+        ), (2 * coss))));
+
+        double ks = get<1>(objInfo)[2];
+
+        double angleFactor = max(0.0, VectorOperations::dot(r, v));
+
+        light = RGB(
+            std::min(255LL, long long int(light.r + lights[i].getColor().r * ks * std::max(pow(std::max(0.0, angleFactor), get<1>(objInfo)[3]), 0.0))),
+            std::min(255LL, long long int(light.g + lights[i].getColor().g * ks * std::max(pow(std::max(0.0, angleFactor), get<1>(objInfo)[3]), 0.0))),
+            std::min(255LL, long long int(light.b + lights[i].getColor().b * ks * std::max(pow(std::max(0.0, angleFactor), get<1>(objInfo)[3]), 0.0)))
+        );
+    }
+    return light;
 }

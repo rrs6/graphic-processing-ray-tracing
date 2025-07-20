@@ -1,6 +1,9 @@
 #include "Plan.hpp"
+#include <array>
 
-Plan::Plan(const Point& p, const Vector &normal, const RGB &color) : p(p), normal(normal), color(color) {}
+using namespace std;
+
+Plan::Plan(const Point& p, const Vector &normal, const RGB &color, const array<double, 6> &props) : p(p), normal(normal), color(color), props(props) {}
 
 Point Plan::getP() const { return p; }
 
@@ -19,4 +22,8 @@ void Plan::transform(const double (&m)[4][4]) {
         (this->normal.getX() * m[1][0]) + (this->normal.getY() * m[1][1]) + (this->normal.getZ() * m[1][2]),
         (this->normal.getX() * m[2][0]) + (this->normal.getY() * m[2][1]) + (this->normal.getZ() * m[2][2])
     );
+}
+
+array<double, 6> Plan::getProps() const {
+    return this->props;
 }
