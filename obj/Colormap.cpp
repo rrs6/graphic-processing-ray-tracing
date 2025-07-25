@@ -32,11 +32,13 @@ struct MaterialProperties {
     Vector ks;  // Specular
     Vector ke;  // Emissivo
     Vector ka;  // Ambiente
+    Vector kr;  // Reflexivo
+    Vector kt;  // Refrativo
     double ns; // Brilho
     double ni; // Índice de refração
     double d;  // Opacidade
 
-    MaterialProperties() : kd(0, 0, 0), ks(0, 0, 0), ke(0, 0, 0), ka(0, 0, 0), ns(0), ni(0), d(0) {}
+    MaterialProperties() : kd(0, 0, 0), ks(0, 0, 0), ke(0, 0, 0), ka(0, 0, 0), kr(0, 0, 0), kt(0, 0, 0), ns(0), ni(0), d(0) {}
 };
 
 class colormap {
@@ -92,7 +94,19 @@ public:
                 if (!currentMaterial.empty()) {
                     mp[currentMaterial].ka = Vector(kaR, kaG, kaB);
                 }
-            } else if (keyword == "Ns") {
+            } else if (keyword == "Kr") {
+                double krR, krG, krB;
+                iss >> krR >> krG >> krB;
+                if (!currentMaterial.empty()) {
+                    mp[currentMaterial].kr = Vector(krR, krG, krB);
+                }
+            } else if (keyword == "Kt") {
+                double ktR, ktG, ktB;
+                iss >> ktR >> ktG >> ktB;
+                if (!currentMaterial.empty()) {
+                    mp[currentMaterial].kt = Vector(ktR, ktG, ktB);
+                }
+            }else if (keyword == "Ns") {
                 iss >> mp[currentMaterial].ns;
             } else if (keyword == "Ni") {
                 iss >> mp[currentMaterial].ni;
