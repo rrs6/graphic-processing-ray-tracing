@@ -208,7 +208,7 @@ public:
             mesh.push_back(make_tuple(faces[i].verticeIndice[0], faces[i].verticeIndice[1], faces[i].verticeIndice[2]));
             i++;
         }
-        return TriangleMesh(vertices, mesh, nrml, RGB(200, 0, 0), curMaterial);
+        return TriangleMesh(vertices, mesh, nrml, RGB(100, 0, 0), curMaterial);
     }
 };
 

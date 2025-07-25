@@ -36,7 +36,7 @@ void Scene::setHeight(int height) { this->height = height; }
 void Scene::setScreenDistance(double distance) { screenDistance = distance; }
 
 
-void Scene::render(vector<TriangleMesh> &meshs, vector<Light> &lights) {
+void Scene::render(const vector<TriangleMesh> &meshs, const vector<Light> &lights) {
 
     Camera cam = getCamera();
     Vector front = cam.getFront();
@@ -80,7 +80,7 @@ void Scene::render(vector<TriangleMesh> &meshs, vector<Light> &lights) {
     }
     out.close();
 }
-RGB Scene::checkIntersections(vector<Sphere> &spheres, vector<Plan> &planes, vector<TriangleMesh> &meshs, Point &screenPoint, vector<Light> &lights)
+RGB Scene::checkIntersections(const vector<Sphere> &spheres, const vector<Plan> &planes, const vector<TriangleMesh> &meshs, Point &screenPoint, const vector<Light> &lights)
 {
     set<tuple<double, RGB, MaterialProperties, Vector, Point>, bool(*)(const tuple<double, RGB, MaterialProperties, Vector, Point>&, const tuple<double, RGB, MaterialProperties, Vector, Point>&)> hits(
     [](const tuple<double, RGB, MaterialProperties, Vector, Point>& a, const tuple<double, RGB, MaterialProperties, Vector, Point>& b) {
@@ -215,10 +215,10 @@ RGB Scene::checkIntersections(vector<Sphere> &spheres, vector<Plan> &planes, vec
             }
         }
     }
-    return (hits.empty() ? RGB(0,0,0) : lighting(lights, make_tuple(get<1>(*hits.begin()), get<2>(*hits.begin()), get<3>(*hits.begin()), get<4>(*hits.begin())), RGB(20, 100, 100)));
+    return (hits.empty() ? RGB(0,0,0) : lighting(lights, make_tuple(get<1>(*hits.begin()), get<2>(*hits.begin()), get<3>(*hits.begin()), get<4>(*hits.begin())), RGB(0, 0, 0)));
 }
 
-RGB Scene::lighting(vector<Light> &lights, tuple<RGB, MaterialProperties, Vector, Point> &objInfo, RGB &ambientLight) {
+RGB Scene::lighting(const vector<Light> &lights, const tuple<RGB, MaterialProperties, Vector, Point> &objInfo, const RGB &ambientLight) {
     RGB light = RGB(
         get<0>(objInfo).r + int(ambientLight.r * get<1>(objInfo).ka.getX()),
         get<0>(objInfo).g + int(ambientLight.g * get<1>(objInfo).ka.getY()),
@@ -239,9 +239,9 @@ RGB Scene::lighting(vector<Light> &lights, tuple<RGB, MaterialProperties, Vector
                 )));
         //Difuse Light
         light = RGB(
-            std::min(255, int(light.r + lights[i].getColor().r * kd.getX() * std::max(0.0, coss))),
-            std::min(255, int(light.g + lights[i].getColor().g * kd.getY() * std::max(0.0, coss))),
-            std::min(255, int(light.b + lights[i].getColor().b * kd.getZ() * std::max(0.0, coss)))
+            std::min(255LL, static_cast<long long int>(light.r + lights[i].getColor().r * kd.getX() * std::max(0.0, coss))),
+            std::min(255LL, static_cast<long long int>(light.g + lights[i].getColor().g * kd.getY() * std::max(0.0, coss))),
+            std::min(255LL, static_cast<long long int>(light.b + lights[i].getColor().b * kd.getZ() * std::max(0.0, coss)))
         );
 
         Vector v = VectorOperations::normalize(Vector(
@@ -267,9 +267,9 @@ RGB Scene::lighting(vector<Light> &lights, tuple<RGB, MaterialProperties, Vector
         double angleFactor = max(0.0, VectorOperations::dot(r, v));
 
         light = RGB(
-            std::min(255LL, long long int(light.r + lights[i].getColor().r * ks.getX() * std::max(pow(std::max(0.0, angleFactor), 10), 0.0))),
-            std::min(255LL, long long int(light.g + lights[i].getColor().g * ks.getY() * std::max(pow(std::max(0.0, angleFactor), 10), 0.0))),
-            std::min(255LL, long long int(light.b + lights[i].getColor().b * ks.getZ() * std::max(pow(std::max(0.0, angleFactor), 10), 0.0)))
+            std::min(255LL, static_cast<long long int>(light.r + lights[i].getColor().r * ks.getX() * std::max(pow(std::max(0.0, angleFactor), 10.0), 0.0))),
+            std::min(255LL, static_cast<long long int>(light.g + lights[i].getColor().g * ks.getY() * std::max(pow(std::max(0.0, angleFactor), 10.0), 0.0))),
+            std::min(255LL, static_cast<long long int>(light.b + lights[i].getColor().b * ks.getZ() * std::max(pow(std::max(0.0, angleFactor), 10.0), 0.0)))
         );
     }
     return light;
