@@ -270,9 +270,9 @@ bool Scene::isShadow(const vector<Plan> &planes, const vector<Sphere> &spheres, 
 
     for (int i = 0; i < planes.size(); i++) {
         double t = VectorOperations::dot(planes[i].getNormal(),
-            Vector(origin.getX() - planes[i].getP().getX(),
-                   origin.getY() - planes[i].getP().getY(),
-                   origin.getZ() - planes[i].getP().getZ())) /
+            Vector(planes[i].getP().getX() - origin.getX(),
+                   planes[i].getP().getY() - origin.getY(),
+                    planes[i].getP().getZ() - origin.getZ())) /
             VectorOperations::dot(planes[i].getNormal(), shadowRay);
 
         if (t > 0 && t < maxDistance) {
