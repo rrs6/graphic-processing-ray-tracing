@@ -27,14 +27,14 @@ public:
     int getWidth() const;
     int getHeight() const;
     double getScreenDistance() const;
-
+    bool isShadow(const vector<Plan> &planes, const vector<Sphere> &spheres, const vector<TriangleMesh> &meshs, const Light &light, Point &point) const;
     void setCamera(const Camera& camera);
     void setWidth(int width);
     void setHeight(int height);
     void setScreenDistance(double distance);
-    void render(const vector<TriangleMesh> &meshs, const vector<Light> &lights);
+    void render(const vector<Plan> &planes, const vector<Sphere> &spheres, const vector<TriangleMesh> &meshs, const vector<Light> &lights);
     RGB checkIntersections(const vector<Sphere> &spheres, const vector<Plan> &planes, const vector<TriangleMesh> &meshs, Point &screenPoint, const vector<Light> &lights);
-    RGB lighting(const vector<Light> &lights, const tuple<RGB, MaterialProperties, Vector, Point> &objInfo, const RGB &ambientLight);
+    RGB lighting(const vector<Plan> &planes, const vector<Sphere> &spheres, const vector<TriangleMesh> &meshs, const vector<Light> &lights, const tuple<RGB, MaterialProperties, Vector, Point> &objInfo, const RGB &ambientLight);
 };
 
 #endif
