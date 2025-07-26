@@ -8,18 +8,24 @@
 int main() {
     objReader obj("../inputs/cubo.obj");
     vector<TriangleMesh> meshs = {obj.getMesh()};
-    // meshs[0].transform({
-    //     {1, 0, 0, 0},
-    //     {0, 0.866, 0.988, 0},
-    //     {0, -0.988, 0.866, 0},
-    //     {0, 0, 0, 1}
-    // });
+    meshs[0].transform({
+        {1, 0, 0, 2},
+        {0, 1, 0, -5},
+        {0, 0, 1, 10},
+        {0, 0, 0, 1}
+    });
     MaterialProperties m = MaterialProperties();
-    m.ka = Vector(1, 1, 1);
+    m.ka = Vector(0, 0, 0);
     m.kd = Vector(1, 1, 1);
-    m.ks = Vector(0.6, 0.6, 0.6);
-    vector<Sphere> spheres = {Sphere(Point(-1, 0, 12), 2, RGB(50, 50, 50), m), Sphere(Point(4, 0, 30), 1, RGB(50, 50, 50), m)};
-   
+    m.ks = Vector(0, 0, 0);
+    m.kr = Vector(1, 1, 1);
+    m.kt = Vector(0, 0, 0);
+    m.d = 1;
+    vector<Sphere> spheres = {Sphere(Point(-6, 0, 10), 2, RGB(50, 0, 0), m), Sphere(Point(1, 0, 15), 2, RGB(0, 0, 100), m)};
+    vector<Plan> planes = {Plan(Point(0, 0, 40), Vector(-3, 0, -1), RGB(0, 0, 50), m)};
+
+    //Sphere(Point(4, 0, 20), 1, RGB(50, 50, 50), m)
+
     Point origin(0, 0.0,-10);
     Point target(0.0, 0, 10);
     Vector up(0.0, 1.0, 0.0);
@@ -32,6 +38,6 @@ int main() {
 
     Scene scene(camera, largura, altura, camera.getD());
 
-    scene.render({}, spheres , {}, vector<Light>{Light(Point(-3, 3, -1), RGB(0,90,0)), Light(Point(20, 0, 12), RGB(90,0,0))});
+    scene.render({}, spheres , {}, vector<Light>{Light(Point(0, 0, 0), RGB(0,60,0))});
     return 0;
 }

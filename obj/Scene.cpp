@@ -35,7 +35,6 @@ void Scene::setHeight(int height) { this->height = height; }
 
 void Scene::setScreenDistance(double distance) { screenDistance = distance; }
 
-
 void Scene::render(const vector<Plan> &planes, const vector<Sphere> &spheres, const vector<TriangleMesh> &meshs, const vector<Light> &lights) {
 
     Camera cam = getCamera();
@@ -65,8 +64,14 @@ void Scene::render(const vector<Plan> &planes, const vector<Sphere> &spheres, co
                 screenO.getZ() + offset.getZ()
             );
 
+            Vector ray = Vector(
+                screenPoint.getX() - getCamera().getO().getX(),
+                screenPoint.getY() - getCamera().getO().getY(),
+                screenPoint.getZ() - getCamera().getO().getZ()
+            );
+
             image[j][i] = checkIntersections(spheres, planes,
-                meshs, screenPoint, lights);
+                meshs, ray, ray, getCamera().getO() , lights, 2);
         }
     }
     ofstream out("output.ppm");
@@ -80,18 +85,13 @@ void Scene::render(const vector<Plan> &planes, const vector<Sphere> &spheres, co
     }
     out.close();
 }
-RGB Scene::checkIntersections(const vector<Sphere> &spheres, const vector<Plan> &planes, const vector<TriangleMesh> &meshs, Point &screenPoint, const vector<Light> &lights)
+RGB Scene::checkIntersections(const vector<Sphere> &spheres, const vector<Plan> &planes, const vector<TriangleMesh> &meshs, Vector &ray, Vector &refRay, const Point &rayO, const vector<Light> &lights, int depth)
 {
     set<tuple<double, RGB, MaterialProperties, Vector, Point>, bool(*)(const tuple<double, RGB, MaterialProperties, Vector, Point>&, const tuple<double, RGB, MaterialProperties, Vector, Point>&)> hits(
     [](const tuple<double, RGB, MaterialProperties, Vector, Point>& a, const tuple<double, RGB, MaterialProperties, Vector, Point>& b) {
         return get<0>(a) < get<0>(b);
     }
 );
-    Vector ray = Vector(
-        screenPoint.getX() - getCamera().getO().getX(),
-        screenPoint.getY() - getCamera().getO().getY(),
-        screenPoint.getZ() - getCamera().getO().getZ()
-    );
 
     for(int i = 0; i < meshs.size(); i++) {
         for(int j = 0; j < meshs[i].getMesh().size(); j++) {
@@ -104,16 +104,16 @@ RGB Scene::checkIntersections(const vector<Sphere> &spheres, const vector<Plan> 
             Point v2 = meshs[i].getVertices().at(get<2>(vertices));
 
             double t = VectorOperations::dot(normal, Vector(
-                v1.getX() - getCamera().getO().getX(),
-                v1.getY() - getCamera().getO().getY(),
-                v1.getZ() - getCamera().getO().getZ()
+                v1.getX() - rayO.getX(),
+                v1.getY() - rayO.getY(),
+                v1.getZ() - rayO.getZ()
             )) / VectorOperations::dot(normal, ray);
 
             if(t > 0) {
                 Point trianglePlanePoint = Point(
-                    getCamera().getO().getX() + VectorOperations::scale(ray, t).getX(),
-                    getCamera().getO().getY() + VectorOperations::scale(ray, t).getY(),
-                    getCamera().getO().getZ() + VectorOperations::scale(ray, t).getZ()
+                    rayO.getX() + VectorOperations::scale(ray, t).getX(),
+                    rayO.getY() + VectorOperations::scale(ray, t).getY(),
+                    rayO.getZ() + VectorOperations::scale(ray, t).getZ()
                 );
 
                 Vector v0v1 = Vector(v1.getX() - v0.getX(), v1.getY() - v0.getY(), v1.getZ() - v0.getZ());
@@ -142,22 +142,22 @@ RGB Scene::checkIntersections(const vector<Sphere> &spheres, const vector<Plan> 
     for(int i = 0; i < planes.size(); i++) {
         double t = VectorOperations::dot(planes[i].getNormal(), 
         Vector(
-            planes[i].getP().getX() - getCamera().getO().getX(), 
-            planes[i].getP().getY() - getCamera().getO().getY(),
-            planes[i].getP().getZ() - getCamera().getO().getZ()
+            planes[i].getP().getX() - rayO.getX(), 
+            planes[i].getP().getY() - rayO.getY(),
+            planes[i].getP().getZ() - rayO.getZ()
         )) / VectorOperations::dot(planes[i].getNormal(), ray);
 
         if(t > 0) {
-            hits.insert({t, planes[i].getColor(), planes[i].getProps(), VectorOperations::normalize(planes[i].getNormal()), Point(getCamera().getO().getX() + (ray.getX() * t), getCamera().getO().getY() + (ray.getY() * t), getCamera().getO().getZ() + (ray.getZ() * t))});
+            hits.insert({t, planes[i].getColor(), planes[i].getProps(), VectorOperations::normalize(planes[i].getNormal()), Point(rayO.getX() + (ray.getX() * t), rayO.getY() + (ray.getY() * t), rayO.getZ() + (ray.getZ() * t))});
         }
     }
 
     for(int i = 0; i < spheres.size(); i++) {
 
         Vector oc = Vector(
-            getCamera().getO().getX() - spheres[i].getO().getX(),
-            getCamera().getO().getY() - spheres[i].getO().getY(),
-            getCamera().getO().getZ() - spheres[i].getO().getZ()
+            rayO.getX() - spheres[i].getO().getX(),
+            rayO.getY() - spheres[i].getO().getY(),
+            rayO.getZ() - spheres[i].getO().getZ()
         );
 
         double a = VectorOperations::dot(ray, ray);
@@ -170,9 +170,9 @@ RGB Scene::checkIntersections(const vector<Sphere> &spheres, const vector<Plan> 
             const double t2 = (-b - sqrt(delta))/(2*a);
             if(t1>0 && t2>0){
                 Point intersection = Point(
-                    getCamera().getO().getX() + (ray.getX() * min(t1, t2)),
-                    getCamera().getO().getY() + (ray.getY() * min(t1, t2)),
-                    getCamera().getO().getZ() + (ray.getZ() * min(t1, t2))
+                    rayO.getX() + (ray.getX() * min(t1, t2)),
+                    rayO.getY() + (ray.getY() * min(t1, t2)),
+                    rayO.getZ() + (ray.getZ() * min(t1, t2))
                 );
 
                 Vector normal = Vector(
@@ -184,9 +184,9 @@ RGB Scene::checkIntersections(const vector<Sphere> &spheres, const vector<Plan> 
                 hits.insert({min(t1, t2), spheres[i].getColor(), spheres[i].getProps(), VectorOperations::normalize(normal), intersection});
             }else if(t1>0) {
                 Point intersection = Point(
-                    getCamera().getO().getX() + (ray.getX() * t1),
-                    getCamera().getO().getY() + (ray.getY() * t1),
-                    getCamera().getO().getZ() + (ray.getZ() * t1)
+                    rayO.getX() + (ray.getX() * t1),
+                    rayO.getY() + (ray.getY() * t1),
+                    rayO.getZ() + (ray.getZ() * t1)
                 );
 
                 Vector normal = Vector(
@@ -199,9 +199,9 @@ RGB Scene::checkIntersections(const vector<Sphere> &spheres, const vector<Plan> 
 
             }else if(t2>0) {
                 Point intersection = Point(
-                    getCamera().getO().getX() + (ray.getX() * t2),
-                    getCamera().getO().getY() + (ray.getY() * t2),
-                    getCamera().getO().getZ() + (ray.getZ() * t2)
+                    rayO.getX() + (ray.getX() * t2),
+                    rayO.getY() + (ray.getY() * t2),
+                    rayO.getZ() + (ray.getZ() * t2)
                 );
 
                 Vector normal = Vector(
@@ -214,7 +214,63 @@ RGB Scene::checkIntersections(const vector<Sphere> &spheres, const vector<Plan> 
             }
         }
     }
-    return (hits.empty() ? RGB(0,0,0) : lighting(planes, spheres, meshs, lights, make_tuple(get<1>(*hits.begin()), get<2>(*hits.begin()), get<3>(*hits.begin()), get<4>(*hits.begin())), RGB(0, 0, 0)));
+    Vector nmrl = (hits.empty() ? Vector(0,0,0) : get<3>(*hits.begin()));
+
+    MaterialProperties mp = (hits.empty() ? MaterialProperties() : get<2>(*hits.begin()));
+
+    Vector bias = VectorOperations::scale(nmrl, 0.001); // ou 1e-4
+        Point newOrigin = Point(
+            get<4>(*hits.begin()).getX() + bias.getX(),
+            get<4>(*hits.begin()).getY() + bias.getY(),
+            get<4>(*hits.begin()).getZ() + bias.getZ()
+        );
+
+
+    double dotIN = VectorOperations::dot(ray, nmrl);
+    Vector reflectedRay = VectorOperations::normalize(
+        VectorOperations::sum(ray, VectorOperations::dirChange(VectorOperations::scale(nmrl, 2 * dotIN)))
+    );
+    RGB baseColor = get<1>(*hits.begin());
+
+
+    RGB refractedComponent(0, 0, 0);
+
+    double cosTeta = VectorOperations::dot(VectorOperations::dirChange(ray), nmrl);
+    double cosTeta0 = sqrt((1 - (mp.d * mp.d)) * (1 - (cosTeta * cosTeta)));
+    Vector refractedDir = VectorOperations::sum(
+        VectorOperations::scale(refractedDir, 1/mp.kt.getX()), 
+        VectorOperations::dirChange(VectorOperations::scale(nmrl, mp.d*cosTeta - cosTeta0)));
+
+    Vector refractBias = VectorOperations::scale(refractedDir, 0.001);
+        Point refractOrigin = Point(
+            get<4>(*hits.begin()).getX() + refractBias.getX(),
+            get<4>(*hits.begin()).getY() + refractBias.getY(),
+            get<4>(*hits.begin()).getZ() + refractBias.getZ()
+        );
+
+
+
+    RGB recursiveLight = depth > 0 ? checkIntersections(spheres, planes, meshs, reflectedRay, refractedDir, newOrigin, lights, depth-1) : RGB(0,0,0);
+
+    RGB reflectedComponent = RGB(
+        recursiveLight.r  * mp.kr.getX(),
+        recursiveLight.g * mp.kr.getY(),
+        recursiveLight.b * mp.kr.getZ()
+    );
+
+    refractedComponent = RGB(
+        recursiveLight.r * mp.kt.getX(),
+        recursiveLight.g * mp.kt.getY(),
+        recursiveLight.b * mp.kt.getZ()
+    );
+
+    RGB actualLight = lighting(planes, spheres, meshs, lights, make_tuple(get<1>(*hits.begin()), get<2>(*hits.begin()), get<3>(*hits.begin()), get<4>(*hits.begin())), RGB(0, 0, 0));
+    if(hits.empty())
+        return RGB(0,0,0);
+    else
+        return RGB(refractedComponent.r + reflectedComponent.r + actualLight.r,
+                   refractedComponent.g + reflectedComponent.g + actualLight.g,
+                   refractedComponent.b + reflectedComponent.b + actualLight.b);
 }
 
 bool Scene::isShadow(const vector<Plan> &planes, const vector<Sphere> &spheres, const vector<TriangleMesh> &meshs, const Light &light, Point &p) const {
@@ -336,6 +392,7 @@ RGB Scene::lighting(const vector<Plan> &planes, const vector<Sphere> &spheres, c
     Point intersection = get<3>(objInfo);
     Vector normal = get<2>(objInfo);
     
+
     for(int i = 0; i < lights.size(); i++) {
             if(!isShadow(planes, spheres, meshs,lights[i], intersection)) {
                 Vector kd = get<1>(objInfo).kd;

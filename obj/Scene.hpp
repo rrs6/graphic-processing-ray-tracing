@@ -33,7 +33,7 @@ public:
     void setHeight(int height);
     void setScreenDistance(double distance);
     void render(const vector<Plan> &planes, const vector<Sphere> &spheres, const vector<TriangleMesh> &meshs, const vector<Light> &lights);
-    RGB checkIntersections(const vector<Sphere> &spheres, const vector<Plan> &planes, const vector<TriangleMesh> &meshs, Point &screenPoint, const vector<Light> &lights);
+    RGB checkIntersections(const vector<Sphere> &spheres, const vector<Plan> &planes, const vector<TriangleMesh> &meshs, Vector &ray, Vector &refRay, const Point &rayO, const vector<Light> &lights, int depth);
     RGB lighting(const vector<Plan> &planes, const vector<Sphere> &spheres, const vector<TriangleMesh> &meshs, const vector<Light> &lights, const tuple<RGB, MaterialProperties, Vector, Point> &objInfo, const RGB &ambientLight);
 };
 
